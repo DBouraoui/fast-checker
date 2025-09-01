@@ -63,6 +63,7 @@ def update_url(url: schemas.UrlCreate ,id: int, db: Session = Depends(get_db)):
 @app.get("/ping-url/{id}")
 def read_url( id: int, db: Session = Depends(get_db)):
     url = db.query(models.Url).filter(models.Url.id == id).first()
+
     if not url:
         raise HTTPException(status_code=404, detail="URL not found")
     resp = pinger.main(url.url)
