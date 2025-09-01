@@ -1,13 +1,14 @@
 from datetime import datetime
-
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 import models
 import schemas
 from database import SessionLocal, engine
-from scripts import pinger
+from scripts import pinger, pingScheduler, fixture
+from typing import List
 
 models.Base.metadata.create_all(bind=engine)
+fixture.load_fixtures()
 
 app = FastAPI( title="Pinger API",)
 
@@ -97,4 +98,39 @@ def create_schedule(schedule: schemas.ScheduleCreate, db: Session = Depends(get_
     db.add(schedule_model)
     db.commit()
     db.refresh(schedule_model)
+
     return schedule_model
+
+@app.get('/schedule/urls', response_model=List[schemas.UrlWithSchedules], tags=["Schedule Management"])
+def read_schedule_urls(db: Session = Depends(get_db)):
+    """Lister toutes les URLs avec leurs schedules."""
+    urls = db.query(models.Url).all()
+    return urls
+
+
+@app.patch("/auto-schedule", tags=["Schedule Management"])
+def switch_scheduler(db: Session = Depends(get_db)):
+    """Activer ou désactiver l'auto ping des URL enregistrer dans le scheduler."""
+    scheduler = db.query(models.Config).first()
+
+    if not scheduler or scheduler.key != "scheduler" :
+        raise HTTPException(status_code=404, detail="No scheduler found")
+
+    scheduler.value = "1" if scheduler.value == "0" else "0"
+    db.commit()
+    db.refresh(scheduler)
+
+    return scheduler
+
+@app.delete("/schedule/{id}", tags=["Schedule Management"])
+def delete_schedule(id: int,db: Session = Depends(get_db)):
+    """Supprimer une tache de schedule par son ID."""
+    scheduler = db.query(models.Scheduler).filter(models.Scheduler.id == id).first()
+
+    if not scheduler:
+        raise HTTPException(status_code=404, detail="Schedule not found")
+
+    db.delete(scheduler)
+    db.commit()
+
+    return True

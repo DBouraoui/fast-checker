@@ -8,7 +8,6 @@ class Url(Base):
     name = Column(String, nullable=False)
     url = Column(String, nullable=False)
 
-    # Ajoute une relation pour accéder aux entrées du Scheduler depuis Url
     schedulers = relationship("Scheduler", back_populates="url")
 
 class Ping(Base):
@@ -25,3 +24,11 @@ class Scheduler(Base):
     date = Column(DateTime, nullable=False)
 
     url = relationship("Url", back_populates="schedulers")
+
+
+class Config(Base):
+    __tablename__ = "config"
+
+    id = Column(Integer, primary_key=True, index=True)
+    key = Column(String, unique=True, nullable=False)
+    value = Column(String, nullable=False)
