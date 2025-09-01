@@ -1,5 +1,5 @@
-from datetime import datetime
 from pydantic import BaseModel
+from datetime import datetime
 
 class UrlCreate(BaseModel):
     name: str
@@ -18,3 +18,14 @@ class PingUrl(BaseModel):
 
 class UrlSimple(BaseModel):
     url: str
+
+class Scheduler(BaseModel):
+    id: int
+    url_id: int
+    date: datetime
+
+    class Config:
+        orm_mode = True
+
+class ScheduleCreate(BaseModel):
+    id: int
