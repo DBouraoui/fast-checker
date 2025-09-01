@@ -11,3 +11,9 @@ class Url(BaseModel):
 
     class Config:
         orm_mode = True
+
+class PingUrl(BaseModel):
+        id: int
+
+class UrlSimple(BaseModel):
+    url: str
