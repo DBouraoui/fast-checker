@@ -1,6 +1,6 @@
 apscheduler
 requests
-fastapi
+fastapi[standard]
 uvicorn[standard]
 sqlalchemy
 databases
